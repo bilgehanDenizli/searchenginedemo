@@ -19,6 +19,14 @@ $env:DB_PASSWORD = 'petclinic'
 .\mvnw '-Dspring-boot.run.profiles=postgres' spring-boot:run
 ```
 
+Elasticsearch is available in `compose.yaml` and the app connects to `http://localhost:9200` by default. Start it before starting the app; Spring Data checks the `pets` index during startup.
+
+```powershell
+docker compose up -d elasticsearch
+```
+
+For a different Elasticsearch URL, set `ELASTICSEARCH_URI`, for example `http://localhost:9201`.
+
 ## REST endpoints
 
 Each resource supports `GET /`, `GET /{id}`, `POST /`, `PUT /{id}`, and `DELETE /{id}`:
@@ -64,4 +72,4 @@ Create a visit using the returned pet ID:
 
 Pet species: `DOG`, `CAT`, `BIRD`, `RABBIT`, `REPTILE`, `OTHER`. Visit status: `SCHEDULED`, `COMPLETED`, `CANCELLED`. Invalid requests return `400`, missing records `404`, and duplicate or referenced records `409`.
 
-The Elasticsearch dependency remains available for the later search layer; this CRUD API currently uses the relational database as its source of truth.
+The relational database is the source of truth. Newly created pets are also indexed in Elasticsearch's `pets` index for the search layer.

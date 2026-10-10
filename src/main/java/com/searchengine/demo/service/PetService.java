@@ -35,8 +35,9 @@ public class PetService {
 	public PetResponse create(PetRequest request) {
 		Owner owner = requireOwner(request.ownerId());
 		Pet pet = new Pet(request.name().trim(), request.species(), normalize(request.breed()), request.birthDate(), owner);
-		elasticSearchIndexService.createPetDocument(pet);
-		return toResponse(petRepository.save(pet));
+		Pet savedPet = petRepository.save(pet);
+		elasticSearchIndexService.createPetDocument(savedPet);
+		return toResponse(savedPet);
 	}
 
 	public PetResponse update(Long id, PetRequest request) {

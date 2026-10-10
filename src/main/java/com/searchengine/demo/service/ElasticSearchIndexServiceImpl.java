@@ -1,13 +1,16 @@
 package com.searchengine.demo.service;
 
 import com.searchengine.demo.model.Pet;
+import com.searchengine.demo.repository.PetSearchRepository;
 import com.searchengine.demo.search.PetSearchDocument;
-import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ElasticSearchIndexServiceImpl implements ElasticSearchIndexService {
-    private final ElasticsearchRepository<PetSearchDocument, String> petSearchElasticsearchRepository;
 
-    public ElasticSearchIndexServiceImpl(ElasticsearchRepository<PetSearchDocument, String> petSearchElasticsearchRepository) {
+    private final PetSearchRepository petSearchElasticsearchRepository;
+
+    public ElasticSearchIndexServiceImpl(PetSearchRepository petSearchElasticsearchRepository) {
         this.petSearchElasticsearchRepository = petSearchElasticsearchRepository;
     }
 
