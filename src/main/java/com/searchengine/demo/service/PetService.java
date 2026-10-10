@@ -16,11 +16,13 @@ import java.util.List;
 public class PetService {
 	private final PetRepository petRepository;
 	private final OwnerRepository ownerRepository;
+	private final ElasticSearchIndexService elasticSearchIndexService;
 
-	public PetService(PetRepository petRepository, OwnerRepository ownerRepository) {
+	public PetService(PetRepository petRepository, OwnerRepository ownerRepository, ElasticSearchIndexService elasticSearchIndexService) {
 		this.petRepository = petRepository;
 		this.ownerRepository = ownerRepository;
-	}
+        this.elasticSearchIndexService = elasticSearchIndexService;
+    }
 
 	public List<PetResponse> findAll() {
 		return petRepository.findAll().stream().map(this::toResponse).toList();
@@ -33,6 +35,7 @@ public class PetService {
 	public PetResponse create(PetRequest request) {
 		Owner owner = requireOwner(request.ownerId());
 		Pet pet = new Pet(request.name().trim(), request.species(), normalize(request.breed()), request.birthDate(), owner);
+		elasticSearchIndexService.createPetDocument(pet);
 		return toResponse(petRepository.save(pet));
 	}
 
