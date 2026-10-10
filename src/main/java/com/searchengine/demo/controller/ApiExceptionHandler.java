@@ -1,7 +1,7 @@
 package com.searchengine.demo.controller;
 
-import com.searchengine.demo.service.ConflictException;
-import com.searchengine.demo.service.ResourceNotFoundException;
+import com.searchengine.demo.fault.exception.ConflictException;
+import com.searchengine.demo.fault.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;

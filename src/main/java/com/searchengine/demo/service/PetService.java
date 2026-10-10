@@ -2,6 +2,7 @@ package com.searchengine.demo.service;
 
 import com.searchengine.demo.dto.PetRequest;
 import com.searchengine.demo.dto.PetResponse;
+import com.searchengine.demo.fault.exception.ResourceNotFoundException;
 import com.searchengine.demo.model.Owner;
 import com.searchengine.demo.model.Pet;
 import com.searchengine.demo.repository.OwnerRepository;

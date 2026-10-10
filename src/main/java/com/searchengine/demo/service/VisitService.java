@@ -2,6 +2,7 @@ package com.searchengine.demo.service;
 
 import com.searchengine.demo.dto.VisitRequest;
 import com.searchengine.demo.dto.VisitResponse;
+import com.searchengine.demo.fault.exception.ResourceNotFoundException;
 import com.searchengine.demo.model.Pet;
 import com.searchengine.demo.model.Visit;
 import com.searchengine.demo.model.VisitStatus;

@@ -2,6 +2,8 @@ package com.searchengine.demo.service;
 
 import com.searchengine.demo.dto.OwnerRequest;
 import com.searchengine.demo.dto.OwnerResponse;
+import com.searchengine.demo.fault.exception.ConflictException;
+import com.searchengine.demo.fault.exception.ResourceNotFoundException;
 import com.searchengine.demo.model.Owner;
 import com.searchengine.demo.repository.OwnerRepository;
 import com.searchengine.demo.search.service.ElasticSearchIndexService;
