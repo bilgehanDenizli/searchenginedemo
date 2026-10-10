@@ -1,8 +1,8 @@
-package com.searchengine.demo.service;
+package com.searchengine.demo.search.service;
 
 import com.searchengine.demo.model.Pet;
-import com.searchengine.demo.repository.PetSearchRepository;
-import com.searchengine.demo.search.PetSearchDocument;
+import com.searchengine.demo.search.repository.PetSearchRepository;
+import com.searchengine.demo.search.model.PetSearchDocument;
 import org.springframework.stereotype.Service;
 
 @Service

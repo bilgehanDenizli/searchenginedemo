@@ -1,4 +1,4 @@
-package com.searchengine.demo.search;
+package com.searchengine.demo.search.model;
 
 import com.searchengine.demo.model.Species;
 import org.springframework.data.annotation.Id;

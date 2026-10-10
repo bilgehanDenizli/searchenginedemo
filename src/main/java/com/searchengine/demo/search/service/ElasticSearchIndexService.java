@@ -1,4 +1,4 @@
-package com.searchengine.demo.service;
+package com.searchengine.demo.search.service;
 
 import com.searchengine.demo.model.Pet;
 

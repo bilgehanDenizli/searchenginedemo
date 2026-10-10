@@ -6,6 +6,7 @@ import com.searchengine.demo.model.Owner;
 import com.searchengine.demo.model.Pet;
 import com.searchengine.demo.repository.OwnerRepository;
 import com.searchengine.demo.repository.PetRepository;
+import com.searchengine.demo.search.service.ElasticSearchIndexService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
