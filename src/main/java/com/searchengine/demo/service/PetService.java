@@ -37,7 +37,7 @@ public class PetService {
 		Owner owner = requireOwner(request.ownerId());
 		Pet pet = new Pet(request.name().trim(), request.species(), normalize(request.breed()), request.birthDate(), owner);
 		Pet savedPet = petRepository.save(pet);
-		elasticSearchIndexService.createPetDocument(savedPet);
+		elasticSearchIndexService.savePetDocument(savedPet);
 		return toResponse(savedPet);
 	}
 
@@ -48,11 +48,15 @@ public class PetService {
 		pet.setBreed(normalize(request.breed()));
 		pet.setBirthDate(request.birthDate());
 		pet.setOwner(requireOwner(request.ownerId()));
-		return toResponse(petRepository.save(pet));
+		Pet savedPet = petRepository.save(pet);
+		elasticSearchIndexService.savePetDocument(savedPet);
+		return toResponse(savedPet);
 	}
 
 	public void delete(Long id) {
-		petRepository.delete(requirePet(id));
+		Pet pet = petRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Pet", id));
+		petRepository.delete(pet);
+		elasticSearchIndexService.deletePetDocument(pet);
 	}
 
 	private Pet requirePet(Long id) {
