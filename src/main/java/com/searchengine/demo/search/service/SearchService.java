@@ -105,6 +105,9 @@ public class SearchService {
 					if (StringUtils.hasText(text)) {
 						bool.must(must -> must.multiMatch(match -> match
 								.query(text.trim())
+								.fuzziness("AUTO")
+								.prefixLength(2)
+								.maxExpansions(50)
 								.fields("name^3", "breed", "ownerName")));
 					}
 					if (species != null) {
@@ -130,7 +133,11 @@ public class SearchService {
 		Query ownerNameQuery = Query.of(query -> query.bool(bool -> {
 			bool.mustNot(mustNot -> mustNot.term(term -> term.field("active").value(false)));
 			if (StringUtils.hasText(text)) {
-				bool.must(must -> must.match(match -> match.field("fullName").query(text.trim())));
+				bool.must(must -> must.match(match -> match.field("fullName")
+						.fuzziness("AUTO")
+						.prefixLength(2)
+						.maxExpansions(50)
+						.query(text.trim())));
 			} else {
 				bool.must(must -> must.matchAll(matchAll -> matchAll));
 			}
@@ -208,6 +215,9 @@ public class SearchService {
 					if (StringUtils.hasText(query)) {
 						bool.must(must -> must.multiMatch(match -> match
 								.query(query.trim())
+								.fuzziness("AUTO")
+								.prefixLength(2)
+								.maxExpansions(50)
 								.fields("ownerName", "petName", "reason^2", "notes")));
 					}
 					if (visitStatus != null) {
