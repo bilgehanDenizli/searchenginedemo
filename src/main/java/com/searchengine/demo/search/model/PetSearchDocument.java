@@ -15,5 +15,6 @@ public record PetSearchDocument(@Id String id,
                                 @Field(type = FieldType.Text) String breed,
                                 @Field(type = FieldType.Date) LocalDate birthDate,
                                 @Field(type = FieldType.Text) String ownerName,
-                                @Field(type = FieldType.Long) Long ownerId) {
+                                @Field(type = FieldType.Long) Long ownerId,
+                                @Field(type = FieldType.Boolean) boolean active) {
 }

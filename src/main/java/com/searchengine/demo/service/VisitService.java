@@ -25,7 +25,7 @@ public class VisitService {
 	}
 
 	public List<VisitResponse> findAll() {
-		return visitRepository.findAll().stream().map(this::toResponse).toList();
+		return visitRepository.findAllByActiveTrueOrderByIdAsc().stream().map(this::toResponse).toList();
 	}
 
 	public VisitResponse findById(Long id) {
@@ -51,8 +51,10 @@ public class VisitService {
 		return toResponse(visitRepository.save(visit));
 	}
 
-	public void delete(Long id) {
-		visitRepository.delete(requireVisit(id));
+	public VisitResponse setActive(Long id, boolean active) {
+		Visit visit = requireVisit(id);
+		visit.setActive(active);
+		return toResponse(visitRepository.save(visit));
 	}
 
 	private Visit requireVisit(Long id) {
@@ -69,6 +71,6 @@ public class VisitService {
 
 	private VisitResponse toResponse(Visit visit) {
 		return new VisitResponse(visit.getId(), visit.getPet().getId(), visit.getPet().getName(), visit.getScheduledAt(),
-				visit.getReason(), visit.getNotes(), visit.getStatus());
+				visit.getReason(), visit.getNotes(), visit.getStatus(), visit.isActive());
 	}
 }

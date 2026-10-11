@@ -42,6 +42,9 @@ public class Visit {
 	@Column(nullable = false, length = 30)
 	private VisitStatus status;
 
+	@Column(name = "is_active", nullable = false, columnDefinition = "boolean default true")
+	private boolean active = true;
+
 	protected Visit() {
 	}
 

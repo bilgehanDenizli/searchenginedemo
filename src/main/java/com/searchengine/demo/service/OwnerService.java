@@ -25,7 +25,7 @@ public class OwnerService {
     }
 
 	public List<OwnerResponse> findAll() {
-		return ownerRepository.findAll().stream().map(this::toResponse).toList();
+		return ownerRepository.findAllByActiveTrueOrderByIdAsc().stream().map(this::toResponse).toList();
 	}
 
 	public OwnerResponse findById(Long id) {
@@ -54,10 +54,12 @@ public class OwnerService {
 		return toResponse(savedOwner);
 	}
 
-	public void delete(Long id) {
-		Owner owner = ownerRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Owner", id));
-		ownerRepository.delete(owner);
-		elasticSearchIndexService.deleteOwnerDocument(owner);
+	public OwnerResponse setActive(Long id, boolean active) {
+		Owner owner = requireOwner(id);
+		owner.setActive(active);
+		Owner savedOwner = ownerRepository.save(owner);
+		elasticSearchIndexService.saveOwnerDocument(savedOwner);
+		return toResponse(savedOwner);
 	}
 
 	private Owner requireOwner(Long id) {
@@ -81,6 +83,6 @@ public class OwnerService {
 	}
 
 	private OwnerResponse toResponse(Owner owner) {
-		return new OwnerResponse(owner.getId(), owner.getFirstName(), owner.getLastName(), owner.getEmail(), owner.getPhone());
+		return new OwnerResponse(owner.getId(), owner.getFirstName(), owner.getLastName(), owner.getEmail(), owner.getPhone(), owner.isActive());
 	}
 }

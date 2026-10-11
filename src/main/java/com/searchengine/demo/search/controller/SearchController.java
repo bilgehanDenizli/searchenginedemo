@@ -1,6 +1,7 @@
 package com.searchengine.demo.search.controller;
 
 import com.searchengine.demo.model.Species;
+import com.searchengine.demo.model.VisitStatus;
 import com.searchengine.demo.search.dto.SearchPage;
 import com.searchengine.demo.search.service.SearchService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,5 +42,13 @@ public class SearchController {
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "20") int size) {
 		return searchService.searchOwners(q, page, size);
+	}
+
+	@GetMapping("/visits")
+	public SearchPage searchVisits(@RequestParam String query,
+								   @RequestParam VisitStatus visitStatus,
+								   @RequestParam(defaultValue = "0") int page,
+								   @RequestParam(defaultValue = "20") int size) {
+		return searchService.searchVisits(query, visitStatus, page, size);
 	}
 }

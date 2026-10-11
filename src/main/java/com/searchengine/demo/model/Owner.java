@@ -30,6 +30,9 @@ public class Owner {
 	@Column(length = 40)
 	private String phone;
 
+	@Column(name = "is_active", nullable = false, columnDefinition = "boolean default true")
+	private boolean active = true;
+
 	protected Owner() {
 	}
 

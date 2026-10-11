@@ -41,6 +41,9 @@ public class Pet {
 	@JoinColumn(name = "owner_id", nullable = false)
 	private Owner owner;
 
+	@Column(name = "is_active", nullable = false, columnDefinition = "boolean default true")
+	private boolean active = true;
+
 	protected Pet() {
 	}
 

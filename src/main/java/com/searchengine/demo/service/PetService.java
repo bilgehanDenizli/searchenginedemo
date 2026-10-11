@@ -27,7 +27,7 @@ public class PetService {
     }
 
 	public List<PetResponse> findAll() {
-		return petRepository.findAll().stream().map(this::toResponse).toList();
+		return petRepository.findAllByActiveTrueOrderByIdAsc().stream().map(this::toResponse).toList();
 	}
 
 	public PetResponse findById(Long id) {
@@ -54,10 +54,12 @@ public class PetService {
 		return toResponse(savedPet);
 	}
 
-	public void delete(Long id) {
-		Pet pet = petRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Pet", id));
-		petRepository.delete(pet);
-		elasticSearchIndexService.deletePetDocument(pet);
+	public PetResponse setActive(Long id, boolean active) {
+		Pet pet = requirePet(id);
+		pet.setActive(active);
+		Pet savedPet = petRepository.save(pet);
+		elasticSearchIndexService.savePetDocument(savedPet);
+		return toResponse(savedPet);
 	}
 
 	private Pet requirePet(Long id) {
@@ -75,6 +77,6 @@ public class PetService {
 	private PetResponse toResponse(Pet pet) {
 		Owner owner = pet.getOwner();
 		return new PetResponse(pet.getId(), pet.getName(), pet.getSpecies(), pet.getBreed(), pet.getBirthDate(),
-				owner.getId(), owner.getFirstName() + " " + owner.getLastName());
+				owner.getId(), owner.getFirstName() + " " + owner.getLastName(), pet.isActive());
 	}
 }

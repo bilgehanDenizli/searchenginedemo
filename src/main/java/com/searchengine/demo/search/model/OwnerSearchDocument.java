@@ -7,7 +7,8 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 @Document(indexName = "owners")
 public record OwnerSearchDocument(@Id String id,
-                                  @Field(type = FieldType.Text) String fullName) {
+                                  @Field(type = FieldType.Text) String fullName,
+                                  @Field(type = FieldType.Boolean) boolean active) {
 
 }
 

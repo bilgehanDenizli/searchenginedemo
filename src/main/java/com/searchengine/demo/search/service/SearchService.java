@@ -2,16 +2,20 @@ package com.searchengine.demo.search.service;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import com.searchengine.demo.model.Species;
+import com.searchengine.demo.model.Visit;
+import com.searchengine.demo.model.VisitStatus;
 import com.searchengine.demo.search.dto.SearchPage;
 import com.searchengine.demo.search.dto.SearchResult;
 import com.searchengine.demo.search.model.OwnerSearchDocument;
 import com.searchengine.demo.search.model.PetSearchDocument;
+import com.searchengine.demo.search.model.VisitSearchDocument;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.MoreLikeThisQuery;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -91,6 +95,10 @@ public class SearchService {
 	private NativeQuery petQuery(String text, Species species, Long ownerId, Pageable pageable) {
 		return NativeQuery.builder()
 				.withQuery(query -> query.bool(bool -> {
+					// Missing values remain visible for search documents created before active tracking.
+					bool.mustNot(mustNot -> mustNot.term(term -> term
+							.field("active")
+							.value(false)));
 					if (StringUtils.hasText(text)) {
 						bool.must(must -> must.multiMatch(match -> match
 								.query(text.trim())
@@ -116,9 +124,15 @@ public class SearchService {
 	}
 
 	private NativeQuery ownerQuery(String text, Pageable pageable) {
-		Query ownerNameQuery = StringUtils.hasText(text)
-				? Query.of(query -> query.match(match -> match.field("fullName").query(text.trim())))
-				: Query.of(query -> query.matchAll(matchAll -> matchAll));
+		Query ownerNameQuery = Query.of(query -> query.bool(bool -> {
+			bool.mustNot(mustNot -> mustNot.term(term -> term.field("active").value(false)));
+			if (StringUtils.hasText(text)) {
+				bool.must(must -> must.match(match -> match.field("fullName").query(text.trim())));
+			} else {
+				bool.must(must -> must.matchAll(matchAll -> matchAll));
+			}
+			return bool;
+		}));
 
 		return NativeQuery.builder()
 				.withQuery(ownerNameQuery)
@@ -162,5 +176,48 @@ public class SearchService {
 	private static SearchResult toOwnerResult(SearchHit<OwnerSearchDocument> hit) {
 		OwnerSearchDocument owner = hit.getContent();
 		return new SearchResult("owner", owner.id(), owner.fullName(), "Owner", hit.getScore());
+	}
+
+	public SearchPage searchVisits(String query, VisitStatus visitStatus, int page, int size) {
+		Pageable pageable = pageRequest(page, size);
+		SearchHits<VisitSearchDocument> hits = elasticsearchOperations.search(
+				visitQuery(query, visitStatus, pageable), VisitSearchDocument.class);
+
+		List<SearchResult> results = hits.getSearchHits().stream()
+				.map(SearchService::toVisitResult)
+				.toList();
+		return new SearchPage(results, hits.getTotalHits(), page, size);
+	}
+
+	private static SearchResult toVisitResult(SearchHit<VisitSearchDocument> visitSearchDocumentSearchHit) {
+		VisitSearchDocument visit = visitSearchDocumentSearchHit.getContent();
+		String summary = visit.ownerName();
+		return new SearchResult("visit", visit.id(), visit.ownerName(), visit.petName(), visitSearchDocumentSearchHit.getScore());
+	}
+
+	private NativeQuery visitQuery(String query, VisitStatus visitStatus, Pageable pageable) {
+		Query visitQuery = Query.of(q -> q.bool(
+				bool ->  {
+					bool.mustNot(
+							mustNot -> mustNot.term(
+									term -> term.field("active").value(false)));
+					if (StringUtils.hasText(query)) {
+						bool.must(must -> must.multiMatch(match -> match
+								.query(query.trim())
+								.fields("ownerName", "petName")));
+					}
+					if (visitStatus != null) {
+						bool.filter(filter -> filter.term(term -> term
+								.field("visitStatus")
+								.value(visitStatus.ordinal())));
+					}
+					return bool;
+				}));
+
+
+		return NativeQuery.builder()
+				.withQuery(visitQuery)
+				.withPageable(pageable)
+				.build();
 	}
 }

@@ -11,5 +11,6 @@ public record VisitResponse(
 		LocalDateTime scheduledAt,
 		String reason,
 		String notes,
-		VisitStatus status) {
+		VisitStatus status,
+		boolean isActive) {
 }

@@ -11,5 +11,6 @@ public record PetResponse(
 		String breed,
 		LocalDate birthDate,
 		Long ownerId,
-		String ownerName) {
+		String ownerName,
+		boolean isActive) {
 }

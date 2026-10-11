@@ -2,11 +2,12 @@ package com.searchengine.demo.controller;
 
 import com.searchengine.demo.dto.PetRequest;
 import com.searchengine.demo.dto.PetResponse;
+import com.searchengine.demo.dto.ActiveStatusRequest;
 import com.searchengine.demo.service.PetService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -50,9 +51,8 @@ public class PetController {
 		return petService.update(id, request);
 	}
 
-	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> delete(@PathVariable Long id) {
-		petService.delete(id);
-		return ResponseEntity.noContent().build();
+	@PatchMapping("/{id}/active")
+	public PetResponse setActive(@PathVariable Long id, @Valid @RequestBody ActiveStatusRequest request) {
+		return petService.setActive(id, request.isActive());
 	}
 }
