@@ -106,7 +106,7 @@ public class SearchService {
 						bool.must(must -> must.multiMatch(match -> match
 								.query(text.trim())
 								.fuzziness("AUTO")
-								.prefixLength(2)
+								.prefixLength(0)
 								.maxExpansions(50)
 								.fields("name^3", "breed", "ownerName")));
 					}
@@ -135,7 +135,7 @@ public class SearchService {
 			if (StringUtils.hasText(text)) {
 				bool.must(must -> must.match(match -> match.field("fullName")
 						.fuzziness("AUTO")
-						.prefixLength(2)
+						.prefixLength(0)
 						.maxExpansions(50)
 						.query(text.trim())));
 			} else {
@@ -216,7 +216,7 @@ public class SearchService {
 						bool.must(must -> must.multiMatch(match -> match
 								.query(query.trim())
 								.fuzziness("AUTO")
-								.prefixLength(2)
+								.prefixLength(0)
 								.maxExpansions(50)
 								.fields("ownerName", "petName", "reason^2", "notes")));
 					}
