@@ -8,6 +8,7 @@ import com.searchengine.demo.model.Visit;
 import com.searchengine.demo.model.VisitStatus;
 import com.searchengine.demo.repository.PetRepository;
 import com.searchengine.demo.repository.VisitRepository;
+import com.searchengine.demo.search.service.ElasticSearchIndexService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,10 +19,13 @@ import java.util.List;
 public class VisitService {
 	private final VisitRepository visitRepository;
 	private final PetRepository petRepository;
+	private final ElasticSearchIndexService elasticSearchIndexService;
 
-	public VisitService(VisitRepository visitRepository, PetRepository petRepository) {
+	public VisitService(VisitRepository visitRepository, PetRepository petRepository,
+						ElasticSearchIndexService elasticSearchIndexService) {
 		this.visitRepository = visitRepository;
 		this.petRepository = petRepository;
+		this.elasticSearchIndexService = elasticSearchIndexService;
 	}
 
 	public List<VisitResponse> findAll() {
@@ -36,7 +40,9 @@ public class VisitService {
 		Pet pet = requirePet(request.petId());
 		Visit visit = new Visit(pet, request.scheduledAt(), request.reason().trim(), normalize(request.notes()),
 				request.status() == null ? VisitStatus.SCHEDULED : request.status());
-		return toResponse(visitRepository.save(visit));
+		Visit savedVisit = visitRepository.save(visit);
+		elasticSearchIndexService.saveVisitDocument(savedVisit);
+		return toResponse(savedVisit);
 	}
 
 	public VisitResponse update(Long id, VisitRequest request) {
@@ -48,13 +54,17 @@ public class VisitService {
 		if (request.status() != null) {
 			visit.setStatus(request.status());
 		}
-		return toResponse(visitRepository.save(visit));
+		Visit savedVisit = visitRepository.save(visit);
+		elasticSearchIndexService.saveVisitDocument(savedVisit);
+		return toResponse(savedVisit);
 	}
 
 	public VisitResponse setActive(Long id, boolean active) {
 		Visit visit = requireVisit(id);
 		visit.setActive(active);
-		return toResponse(visitRepository.save(visit));
+		Visit savedVisit = visitRepository.save(visit);
+		elasticSearchIndexService.saveVisitDocument(savedVisit);
+		return toResponse(savedVisit);
 	}
 
 	private Visit requireVisit(Long id) {

@@ -2,7 +2,6 @@ package com.searchengine.demo.search.service;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import com.searchengine.demo.model.Species;
-import com.searchengine.demo.model.Visit;
 import com.searchengine.demo.model.VisitStatus;
 import com.searchengine.demo.search.dto.SearchPage;
 import com.searchengine.demo.search.dto.SearchResult;
@@ -15,7 +14,6 @@ import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.core.query.MoreLikeThisQuery;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -51,10 +49,14 @@ public class SearchService {
 				petQuery(queryText, null, null, candidatePage), PetSearchDocument.class);
 		SearchHits<OwnerSearchDocument> ownerHits = elasticsearchOperations.search(
 				ownerQuery(queryText, candidatePage), OwnerSearchDocument.class);
+		SearchHits<VisitSearchDocument> visitHits = elasticsearchOperations.search(
+				visitQuery(queryText, null, candidatePage), VisitSearchDocument.class);
 
-		List<SearchResult> candidates = Stream.concat(
+		List<SearchResult> candidates = Stream.of(
 				petHits.getSearchHits().stream().map(SearchService::toPetResult),
-				ownerHits.getSearchHits().stream().map(SearchService::toOwnerResult))
+				ownerHits.getSearchHits().stream().map(SearchService::toOwnerResult),
+				visitHits.getSearchHits().stream().map(SearchService::toVisitResult))
+				.flatMap(stream -> stream)
 				.sorted(Comparator.comparingDouble(SearchResult::score).reversed()
 						.thenComparing(SearchResult::type)
 						.thenComparing(SearchResult::id))
@@ -66,7 +68,8 @@ public class SearchService {
 				? List.of()
 				: new ArrayList<>(candidates.subList(fromIndex, toIndex));
 
-		return new SearchPage(results, petHits.getTotalHits() + ownerHits.getTotalHits(), page, size);
+		return new SearchPage(results, petHits.getTotalHits() + ownerHits.getTotalHits()
+				+ visitHits.getTotalHits(), page, size);
 	}
 
 	public SearchPage searchPets(String text, Species species, Long ownerId, int page, int size) {
@@ -191,8 +194,9 @@ public class SearchService {
 
 	private static SearchResult toVisitResult(SearchHit<VisitSearchDocument> visitSearchDocumentSearchHit) {
 		VisitSearchDocument visit = visitSearchDocumentSearchHit.getContent();
-		String summary = visit.ownerName();
-		return new SearchResult("visit", visit.id(), visit.ownerName(), visit.petName(), visitSearchDocumentSearchHit.getScore());
+		String summary = visit.reason() + " · Owner: " + visit.ownerName() + " · " + visit.status();
+		return new SearchResult("visit", visit.id(), visit.petName(), summary,
+				visitSearchDocumentSearchHit.getScore());
 	}
 
 	private NativeQuery visitQuery(String query, VisitStatus visitStatus, Pageable pageable) {
@@ -204,12 +208,12 @@ public class SearchService {
 					if (StringUtils.hasText(query)) {
 						bool.must(must -> must.multiMatch(match -> match
 								.query(query.trim())
-								.fields("ownerName", "petName")));
+								.fields("ownerName", "petName", "reason^2", "notes")));
 					}
 					if (visitStatus != null) {
 						bool.filter(filter -> filter.term(term -> term
-								.field("visitStatus")
-								.value(visitStatus.ordinal())));
+								.field("status")
+								.value(visitStatus.name())));
 					}
 					return bool;
 				}));

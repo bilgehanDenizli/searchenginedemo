@@ -46,7 +46,7 @@ public class SearchController {
 
 	@GetMapping("/visits")
 	public SearchPage searchVisits(@RequestParam String query,
-								   @RequestParam VisitStatus visitStatus,
+								   @RequestParam(required = false) VisitStatus visitStatus,
 								   @RequestParam(defaultValue = "0") int page,
 								   @RequestParam(defaultValue = "20") int size) {
 		return searchService.searchVisits(query, visitStatus, page, size);

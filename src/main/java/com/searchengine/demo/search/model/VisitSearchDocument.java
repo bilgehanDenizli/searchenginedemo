@@ -9,5 +9,9 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 public record VisitSearchDocument(@Id String id,
                                   @Field(type = FieldType.Text) String ownerName,
                                   @Field(type = FieldType.Text) String petName,
-                                  @Field(type = FieldType.Text) String visitStatus) {
+                                  @Field(type = FieldType.Text) String reason,
+                                  @Field(type = FieldType.Text) String notes,
+                                  @Field(type = FieldType.Keyword) String scheduledAt,
+                                  @Field(type = FieldType.Keyword) String status,
+                                  @Field(type = FieldType.Boolean) boolean active) {
 }
